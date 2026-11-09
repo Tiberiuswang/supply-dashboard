@@ -173,7 +173,7 @@ with tab1:
             with box.container():
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric('回放进度', f'{step / total:.0%}')
-                c2.metric('当前订单日期', f'{last_day:%Y-%m-%d}')
+                c2.metric('当前订单日期', f'{last_day:%m-%d}')
                 c3.metric('累计延误率', f'{rate:.1%}')
                 c4.metric('延误涉及金额', f'{late_amt:,.0f}')
                 if rate > threshold:
