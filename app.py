@@ -17,8 +17,6 @@ def load():
 
 df = load()
 modes = sorted(df['ship_mode'].unique())
-
-# ---------- 侧边栏 ----------
 st.sidebar.header('回放设置')
 batch = st.sidebar.slider('每批订单行数', 500, 5000, 1000, 500)
 wait = st.sidebar.slider('刷新间隔（秒）', 0.1, 3.0, 0.5, 0.1)
@@ -28,8 +26,6 @@ st.sidebar.header('报童模型参数（假设值）')
 cu = st.sidebar.slider('晚到每天损失 Cu', 1.0, 10.0, 3.0, 0.5)
 co = st.sidebar.slider('过长承诺每天损失 Co', 0.5, 5.0, 1.0, 0.5)
 
-
-# ---------- 工具函数 ----------
 def best_promise(days, cu, co):
     ratio = cu / (cu + co)
     return int(np.percentile(days, ratio * 100, method='higher'))
@@ -43,13 +39,13 @@ def expected_cost(days, T, cu, co):
 
 def show(fig):
     st.pyplot(fig)
-    plt.close(fig)   # 及时关闭，避免回放时内存越积越多
+    plt.close(fig) 
 
 
 def heatmap_fig(data):
     pv = data.pivot_table(index='ship_mode', columns='region', values='is_late', aggfunc='mean')
     fig, ax = plt.subplots(figsize=(7, 3.5))
-    im = ax.imshow(pv.values, cmap='Reds', vmin=0, vmax=1, aspect='auto')   # 固定色阶，帧与帧可比
+    im = ax.imshow(pv.values, cmap='Reds', vmin=0, vmax=1, aspect='auto')  
     ax.set_xticks(range(len(pv.columns)))
     ax.set_xticklabels(pv.columns, rotation=60, ha='right', fontsize=7)
     ax.set_yticks(range(len(pv.index)))
@@ -80,7 +76,6 @@ def pareto_fig(data):
 
 tab1, tab2, tab3 = st.tabs(['实时回放', '整体分析', '承诺天数优化'])
 
-# ---------- 页签2：整体分析（静态，先定义） ----------
 with tab2:
     st.subheader('月度延误率与 3 个月移动平均')
     month = df['order_date'].dt.to_period('M').astype(str)
@@ -103,7 +98,6 @@ with tab2:
     k1.metric('延误订单金额占比', f'{late_amt_all / total_amt:.1%}')
     k2.metric('估算赔付损失', f'{late_amt_all * pay:,.0f}')
 
-# ---------- 页签3：报童模型（静态，先定义） ----------
 with tab3:
     st.subheader('报童模型：按成本比例确定最优承诺天数（前70%训练，后30%验证）')
     cut = int(len(df) * 0.7)
@@ -155,7 +149,6 @@ with tab3:
     cost = pd.Series([expected_cost(days, T, cu, co) for T in Ts], index=Ts)
     st.line_chart(cost)
 
-# ---------- 页签1：实时回放（循环放最后） ----------
 with tab1:
     box = st.empty()
     if not run:
